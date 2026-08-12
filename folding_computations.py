@@ -373,6 +373,207 @@ def _run_self_tests():
     print("All folding-computation self-tests passed.")
 
 
+# ----------------------------------------------------------------------
+# Trace extension
+# ----------------------------------------------------------------------
+@dataclass(frozen=True)
+class TraceStep:
+    index: int
+    path: str
+    op: str
+    detail: str
+    before: Tuple[Cell, ...]
+    after: Tuple[Cell, ...]
+    outputs: Tuple[int, ...]
+    branch_taken: Optional[bool] = None
+    record: Optional[FoldRecord] = None
+    changed_cells: Tuple[int, ...] = ()
+
+
+def _pred_repr(p: Optional[Pred]) -> str:
+    if p is None:
+        return "?"
+    if p.kind == "len_eq":
+        return f"len(cells) == {p.a}"
+    if p.kind == "value_eq":
+        return f"cell[{p.a}].value == {p.b}"
+    if p.kind == "value_neq":
+        return f"cell[{p.a}].value != {p.b}"
+    if p.kind == "cell_eq":
+        return f"cell[{p.a}].value == cell[{p.b}].value"
+    if p.kind == "is_portal":
+        return f"cell[{p.a}].portal"
+    return p.kind
+
+
+def run_program_traced(values, program, radix: int = 9, max_steps: int = 10_000_000):
+    """Exact traced version of run_program().
+
+    Returns:
+        cells, out, history, trace
+
+    The first three values match run_program(); the fourth is a list of
+    TraceStep objects describing each VM step.
+    """
+    out: List[int] = []
+    history: List[Tuple[Tuple[int, ...], FoldRecord]] = []
+    trace: List[TraceStep] = []
+    budget = [max_steps]
+
+    def tick():
+        budget[0] -= 1
+        if budget[0] < 0:
+            raise RuntimeError("step limit exceeded (runaway loop?)")
+
+    def snap(cells):
+        return tuple(Cell(c.value, c.members) for c in cells)
+
+    def add_step(
+        path,
+        ins,
+        before,
+        after,
+        detail="",
+        branch_taken=None,
+        record=None,
+        changed=(),
+    ):
+        trace.append(
+            TraceStep(
+                index=len(trace),
+                path=path,
+                op=ins.op if ins is not None else "INIT",
+                detail=detail,
+                before=before,
+                after=after,
+                outputs=tuple(out),
+                branch_taken=branch_taken,
+                record=record,
+                changed_cells=changed,
+            )
+        )
+
+    initial = tuple(make_cell(v) for v in values)
+    add_step("init", None, initial, initial, f"initial strip: {list(values)}")
+
+    def exec_prog(cells, prog, path):
+        for i, ins in enumerate(prog):
+            tick()
+            p = f"{path}[{i}]" if path else f"[{i}]"
+            before = snap(cells)
+
+            if ins.op == "READ":
+                val = cells[ins.arg].value
+                out.append(val)
+                add_step(
+                    p,
+                    ins,
+                    before,
+                    snap(cells),
+                    f"READ cell {ins.arg} -> {val}",
+                )
+
+            elif ins.op == "BRANCH":
+                cond = eval_pred(cells, ins.pred)
+                add_step(
+                    p,
+                    ins,
+                    before,
+                    snap(cells),
+                    f"BRANCH {_pred_repr(ins.pred)} -> {'then' if cond else 'else'}",
+                    branch_taken=cond,
+                )
+                cells = exec_prog(
+                    cells,
+                    ins.then_prog if cond else ins.else_prog,
+                    f"{p}.{'then' if cond else 'else'}",
+                )
+
+            elif ins.op == "SLIDE":
+                old = cells[ins.arg].value
+                new = max(1, old + ins.k * radix)
+                lst = list(cells)
+                lst[ins.arg] = Cell(new, lst[ins.arg].members)
+                cells = tuple(lst)
+                add_step(
+                    p,
+                    ins,
+                    before,
+                    snap(cells),
+                    f"SLIDE cell {ins.arg} by k={ins.k}: {old} -> {new}",
+                    changed=(ins.arg,),
+                )
+
+            elif ins.op == "WHILE":
+                add_step(
+                    p,
+                    ins,
+                    before,
+                    snap(cells),
+                    f"WHILE {_pred_repr(ins.pred)} enter",
+                )
+
+                check = 0
+                while True:
+                    tick()
+                    cond = eval_pred(cells, ins.pred)
+                    check_snap = snap(cells)
+                    add_step(
+                        f"{p}.check[{check}]",
+                        ins,
+                        check_snap,
+                        check_snap,
+                        f"WHILE check {check}: {_pred_repr(ins.pred)} = {cond}",
+                        branch_taken=cond,
+                    )
+                    if not cond:
+                        break
+                    cells = exec_prog(cells, ins.body, f"{p}.body[{check}]")
+                    check += 1
+
+                add_step(
+                    f"{p}.exit",
+                    ins,
+                    snap(cells),
+                    snap(cells),
+                    f"WHILE exited after {check} iteration(s)",
+                )
+
+            else:
+                res = (
+                    fold_strip(cells, ins.arg, ins.rule, radix)
+                    if ins.op == "FOLD"
+                    else glue_cells(cells, ins.arg, ins.rule, radix)
+                )
+                history.append((tuple(c.value for c in before), res.record))
+                cells = res.cells
+                after = snap(cells)
+
+                changed = tuple(
+                    idx for idx, c in enumerate(after) if len(c.members) > 1 or c.portal
+                )
+
+                if ins.op == "FOLD":
+                    detail = f"FOLD pivot={ins.arg} rule={ins.rule.value}"
+                else:
+                    detail = f"GLUE index={ins.arg} rule={ins.rule.value}"
+
+                add_step(
+                    p,
+                    ins,
+                    before,
+                    after,
+                    detail,
+                    record=res.record,
+                    changed=changed,
+                )
+
+        return cells
+
+    cells = exec_prog(initial, tuple(program), "")
+    return cells, out, history, trace
+
+
 if __name__ == "__main__":
     _run_self_tests()
     visited, _ = run_state_schedule()

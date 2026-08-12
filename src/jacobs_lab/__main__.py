@@ -1,6 +1,6 @@
 import sys
 
-from .lab_cli import main
+from .cli.lab_cli import main
 
 
 def main_entry():

@@ -1,1 +1,6 @@
-from .folding_computations import *  # noqa: F401,F403
+"""Compatibility alias: folding_computation -> jacobs_lab.computation.folding_computations."""
+
+from .computation import folding_computations as _impl  # noqa: F401
+import sys as _sys
+
+_sys.modules[__name__] = _impl

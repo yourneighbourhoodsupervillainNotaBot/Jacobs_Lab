@@ -207,9 +207,7 @@ if __name__ == "__main__":
     print("\nNumeric roots of x^5 - x - 1:")
     for root in durand_kerner(quint):
         print(f"  {root.real:+.10f} {root.imag:+.10f}i")
-    ev = s5_evidence(
-        quint, prime_limit=200
-    )  # p=163 is needed for the transposition witness
+    ev = s5_evidence(quint, prime_limit=200)  # p=163 is needed for the transposition witness
     print(f"S5 evidence (5-cycle prime, transposition prime): {ev}")
     if ev is not None:
         print(

@@ -63,21 +63,17 @@ def _tone(freq: float, duration: float, sr: int = SAMPLE_RATE) -> np.ndarray:
     n = len(t)
     a, d, r = int(0.05 * n), int(0.15 * n), int(0.25 * n)
     s = max(n - a - d - r, 0)
-    env = np.concatenate(
-        [
-            np.linspace(0, 1, a, endpoint=False) if a else np.array([]),
-            np.linspace(1, 0.7, d, endpoint=False) if d else np.array([]),
-            np.full(s, 0.7),
-            np.linspace(0.7, 0, r, endpoint=True) if r else np.array([]),
-        ]
-    )
+    env = np.concatenate([
+        np.linspace(0, 1, a, endpoint=False) if a else np.array([]),
+        np.linspace(1, 0.7, d, endpoint=False) if d else np.array([]),
+        np.full(s, 0.7),
+        np.linspace(0.7, 0, r, endpoint=True) if r else np.array([]),
+    ])
     env = env[:n] if len(env) >= n else np.pad(env, (0, n - len(env)))
     return wave_ * env
 
 
-def _chord(
-    freqs: Tuple[float, ...], duration: float, accent: bool = False
-) -> np.ndarray:
+def _chord(freqs: Tuple[float, ...], duration: float, accent: bool = False) -> np.ndarray:
     tones = [_tone(f, duration) for f in freqs]
     mixed = sum(tones) / len(tones)
     if accent:
@@ -104,10 +100,7 @@ class SonifiedStep:
 
 
 def sonify_walk(
-    sm: TriangleStateMachine,
-    start: str = "F",
-    loops: int = 3,
-    base_duration: float = 0.5,
+    sm: TriangleStateMachine, start: str = "F", loops: int = 3, base_duration: float = 0.5
 ) -> List[SonifiedStep]:
     steps: List[SonifiedStep] = []
     total = loops * len(sm.transitions)
@@ -128,17 +121,15 @@ def sonify_walk(
         elif accent:
             duration = base_duration * 1.3
 
-        steps.append(
-            SonifiedStep(
-                letter=letter,
-                root=state.root,
-                freqs=chord_freqs(state.root),
-                duration=duration,
-                accent=accent,
-                label=label,
-                arpeggiate=(state.mode == Mode.CONTINUE),
-            )
-        )
+        steps.append(SonifiedStep(
+            letter=letter,
+            root=state.root,
+            freqs=chord_freqs(state.root),
+            duration=duration,
+            accent=accent,
+            label=label,
+            arpeggiate=(state.mode == Mode.CONTINUE),
+        ))
         letter = t.dst
     return steps
 
@@ -188,9 +179,7 @@ def _run_self_tests():
     # 9-EDO: root 1 and root 10-equivalent (root 1 an octave up) differ by
     # exactly a factor of 2 (one octave), confirming the tuning is correct.
     assert abs(root_freq(1, 220.0) * 2 - root_freq(1, 220.0) * 2) < 1e-9
-    assert (
-        abs(root_freq(10, 220.0, radix=9) / root_freq(1, 220.0, radix=9) - 2.0) < 1e-9
-    )
+    assert abs(root_freq(10, 220.0, radix=9) / root_freq(1, 220.0, radix=9) - 2.0) < 1e-9
 
     sm = TriangleStateMachine()
     steps = sonify_walk(sm, start="F", loops=2, base_duration=0.3)
@@ -218,12 +207,10 @@ if __name__ == "__main__":
 
     print("\nWalk:")
     for s in steps[:7]:
-        print(
-            f"  {s.letter} (root {s.root}): chord={[round(f,1) for f in s.freqs]}Hz "
-            f"mode={'arpeggio' if s.arpeggiate else 'block'} "
-            f"{'[ACCENT: ' + s.label + ']' if s.accent else ''}"
-        )
+        print(f"  {s.letter} (root {s.root}): chord={[round(f,1) for f in s.freqs]}Hz "
+              f"mode={'arpeggio' if s.arpeggiate else 'block'} "
+              f"{'[ACCENT: ' + s.label + ']' if s.accent else ''}")
 
     audio = render(steps)
-    write_wav("triangle_walk.wav", audio)
+    write_wav("/home/claude/triangle_walk.wav", audio)
     print(f"\nWrote {len(audio)/SAMPLE_RATE:.1f}s of audio to triangle_walk.wav")

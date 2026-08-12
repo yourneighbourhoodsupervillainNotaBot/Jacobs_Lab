@@ -4,8 +4,8 @@ import json
 import math
 from typing import List
 
-from lab_compat import apply_pyglet_label_guard
-from lab_trace import LabTrace
+from .lab_compat import apply_pyglet_label_guard
+from .lab_trace import LabTrace
 
 
 def _short(s: str, n: int = 110) -> str:

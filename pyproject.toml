@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jacobs-lab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Recursive topology, folding computation, and laboratory instruments"
 requires-python = ">=3.10"
 
@@ -35,15 +35,8 @@ dev = [
 "ruff",
 ]
 
-[tool.setuptools]
-# This MVP packages the new lab layer explicitly.
-# Later, you can extend this list to include the full repository modules,
-# or convert the repository into a real package directory.
-py-modules = [
-"lab_compat",
-"lab_trace",
-"lab_adapters",
-"lab_export",
-"lab_inspector",
-"lab_cli",
-]
+[project.scripts]
+jacobs-lab = "jacobs_lab.__main__:main_entry"
+
+[tool.setuptools.packages.find]
+where = ["src"]

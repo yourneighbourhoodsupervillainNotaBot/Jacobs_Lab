@@ -1,3 +1,3 @@
-"""Jacobs Lab package (subpackage split refinement)."""
+"""Jacobs Lab package (canonical refinement)."""
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"

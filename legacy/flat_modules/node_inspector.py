@@ -4,8 +4,8 @@ import math
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from jacobs_lab.core.recursive_lattice import RecursiveLattice
-from jacobs_lab.structure.level_tree import TreeNode
+from legacy.flat_modules.recursive_lattice import RecursiveLattice
+from Level_tree import TreeNode
 
 
 @dataclass(frozen=True)

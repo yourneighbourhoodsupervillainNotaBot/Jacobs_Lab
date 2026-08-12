@@ -4,11 +4,15 @@ import importlib
 
 
 def import_folding():
-    """Import the folding VM module from the split package."""
+    """Import the folding VM module from the canonical package layout."""
     try:
-        return importlib.import_module("jacobs_lab.computation.folding_computation")
+        return importlib.import_module(
+            "jacobs_lab.computation.folding_computation"
+        )
     except ModuleNotFoundError:
-        return importlib.import_module("jacobs_lab.computation.folding_computations")
+        return importlib.import_module(
+            "jacobs_lab.computation.folding_computations"
+        )
 
 
 def apply_pyglet_label_guard():

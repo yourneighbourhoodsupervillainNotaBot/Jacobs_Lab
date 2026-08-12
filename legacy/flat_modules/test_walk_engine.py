@@ -1,9 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
-from jacobs_lab.core.recursive_lattice import RecursiveLattice
-from jacobs_lab.structure.level_tree import TreeNode, flatten
-from jacobs_lab.testing.test_harness import TestResult
+from legacy.flat_modules.recursive_lattice import RecursiveLattice
+from legacy.flat_modules.Level_tree import TreeNode, flatten
+from legacy.flat_modules.test_harness import TestResult
 
 # PASS advances the X axis (RIGHT / double), FAIL advances the Y axis
 # (UP / half) -- reusing RecursiveLattice's existing two directions rather
@@ -20,7 +20,7 @@ def build_test_tree(
     start_y: int = 1,
 ) -> Tuple[TreeNode, Dict[int, TestResult]]:
     """
-    Builds a genuine level_tree.TreeNode chain: child[0] at each node is the
+    Builds a genuine Level_tree.TreeNode chain: child[0] at each node is the
     move the test suite actually took (PASS->RIGHT, FAIL->UP), continuing
     the chain; child[1], when present, is the untaken alternative, added as
     a childless leaf -- a 'branch preview' stub, not a road walked. This

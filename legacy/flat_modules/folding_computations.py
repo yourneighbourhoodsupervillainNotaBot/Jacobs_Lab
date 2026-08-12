@@ -5,10 +5,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Sequence, Tuple
 
-from jacobs_lab.core.general_recursive_mapper import digital_root
-from jacobs_lab.core.named_aliases import LETTER_TO_ROOT, PORTAL_LETTERS
-from jacobs_lab.math_lenses.set_theory import UnionFind
-from jacobs_lab.structure.triangle_state_machine import AB, CPhase, TriangleStateMachine
+from legacy.flat_modules.general_recursive_mapper import digital_root
+from legacy.flat_modules.named_aliases import LETTER_TO_ROOT, PORTAL_LETTERS
+from legacy.flat_modules.set_theory import UnionFind
+from legacy.flat_modules.triangle_state_machine import AB, CPhase, TriangleStateMachine
 
 
 class Combine(Enum):
@@ -361,7 +361,7 @@ def _run_self_tests():
     lf = fold_lattice([(x, y) for x in range(1, 10) for y in range(1, 10)])
     assert len(lf.crease) == 9 and len(lf.classes) == 45
     assert frozenset({(6, 9), (9, 6)}) in lf.classes
-    from jacobs_lab.structure.level_tree import RecursiveLattice, build_level_tree, flatten
+    from legacy.flat_modules.Level_tree import RecursiveLattice, build_level_tree, flatten
 
     lat = RecursiveLattice(radix=9, x_multiplier=2)
     tree = build_level_tree(lat, 1, 1, 2)

@@ -12,3 +12,7 @@ venv/
 .pytest_cache/
 .ruff_cache/
 .hypothesis/
+# added by tools/normalize_repository.py
+backup_jacobs_lab*/
+traces/*
+!traces/.gitkeep

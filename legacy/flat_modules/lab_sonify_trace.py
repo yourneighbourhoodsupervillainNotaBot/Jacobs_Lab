@@ -13,8 +13,8 @@ try:
         write_wav,
     )
 except ImportError:
-    from legacy.flat_modules.general_recursive_mapper import digital_root
-    from legacy.flat_modules.lab_trace import LabTrace, TraceBuilder
+    from general_recursive_mapper import digital_root
+    from lab_trace import LabTrace, TraceBuilder
     from legacy.flat_modules.sonify import (
         SonifiedStep,
         chord_freqs,

@@ -1,0 +1,594 @@
+{
+  "schema": 1,
+  "source": "triangle_state_machine",
+  "title": "Triangle state walk x3",
+  "created": "2026-08-12T02:31:05.541914+00:00",
+  "initial": {
+    "letter": "F",
+    "root": 6,
+    "mode": "continues",
+    "ab": "outside",
+    "c": "balanced"
+  },
+  "events": [
+    {
+      "step": 0,
+      "source": "triangle_state_machine",
+      "kind": "init",
+      "path": "start",
+      "before": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {},
+      "t": null
+    },
+    {
+      "step": 1,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[0]",
+      "before": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "F-E",
+        "topo": "same root (state-only change)",
+        "note": "C balanced -> down"
+      },
+      "t": null
+    },
+    {
+      "step": 2,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[1]",
+      "before": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "DISCONTINUE",
+        "topo": "different cycles (jump)",
+        "note": "outside -> inside"
+      },
+      "t": null
+    },
+    {
+      "step": 3,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[2]",
+      "before": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "E-F",
+        "topo": "different cycles (jump)",
+        "note": "C down -> balanced, flip pending"
+      },
+      "t": null
+    },
+    {
+      "step": 4,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[3]",
+      "before": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "FLIP",
+        "topo": "different cycles (jump)",
+        "note": "C balanced -> up"
+      },
+      "t": null
+    },
+    {
+      "step": 5,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[4]",
+      "before": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "C-B",
+        "topo": "same cycle, advance 2",
+        "note": "inside -> outside"
+      },
+      "t": null
+    },
+    {
+      "step": 6,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[5]",
+      "before": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "B-C",
+        "topo": "different cycles (jump)",
+        "note": "C up -> balanced"
+      },
+      "t": null
+    },
+    {
+      "step": 7,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[6]",
+      "before": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "RESTART/A-F",
+        "topo": "same cycle, advance 1",
+        "note": "close loop"
+      },
+      "t": null
+    },
+    {
+      "step": 8,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[7]",
+      "before": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "F-E",
+        "topo": "same root (state-only change)",
+        "note": "C balanced -> down"
+      },
+      "t": null
+    },
+    {
+      "step": 9,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[8]",
+      "before": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "DISCONTINUE",
+        "topo": "different cycles (jump)",
+        "note": "outside -> inside"
+      },
+      "t": null
+    },
+    {
+      "step": 10,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[9]",
+      "before": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "E-F",
+        "topo": "different cycles (jump)",
+        "note": "C down -> balanced, flip pending"
+      },
+      "t": null
+    },
+    {
+      "step": 11,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[10]",
+      "before": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "FLIP",
+        "topo": "different cycles (jump)",
+        "note": "C balanced -> up"
+      },
+      "t": null
+    },
+    {
+      "step": 12,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[11]",
+      "before": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "C-B",
+        "topo": "same cycle, advance 2",
+        "note": "inside -> outside"
+      },
+      "t": null
+    },
+    {
+      "step": 13,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[12]",
+      "before": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "B-C",
+        "topo": "different cycles (jump)",
+        "note": "C up -> balanced"
+      },
+      "t": null
+    },
+    {
+      "step": 14,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[13]",
+      "before": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "RESTART/A-F",
+        "topo": "same cycle, advance 1",
+        "note": "close loop"
+      },
+      "t": null
+    },
+    {
+      "step": 15,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[14]",
+      "before": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "F-E",
+        "topo": "same root (state-only change)",
+        "note": "C balanced -> down"
+      },
+      "t": null
+    },
+    {
+      "step": 16,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[15]",
+      "before": {
+        "letter": "G",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "meta": {
+        "action": "DISCONTINUE",
+        "topo": "different cycles (jump)",
+        "note": "outside -> inside"
+      },
+      "t": null
+    },
+    {
+      "step": 17,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[16]",
+      "before": {
+        "letter": "E",
+        "root": 7,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "down"
+      },
+      "after": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "E-F",
+        "topo": "different cycles (jump)",
+        "note": "C down -> balanced, flip pending"
+      },
+      "t": null
+    },
+    {
+      "step": 18,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[17]",
+      "before": {
+        "letter": "D",
+        "root": 9,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "FLIP",
+        "topo": "different cycles (jump)",
+        "note": "C balanced -> up"
+      },
+      "t": null
+    },
+    {
+      "step": 19,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[18]",
+      "before": {
+        "letter": "C",
+        "root": 8,
+        "mode": "discontinues",
+        "ab": "inside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "meta": {
+        "action": "C-B",
+        "topo": "same cycle, advance 2",
+        "note": "inside -> outside"
+      },
+      "t": null
+    },
+    {
+      "step": 20,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[19]",
+      "before": {
+        "letter": "B",
+        "root": 5,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "up"
+      },
+      "after": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "B-C",
+        "topo": "different cycles (jump)",
+        "note": "C up -> balanced"
+      },
+      "t": null
+    },
+    {
+      "step": 21,
+      "source": "triangle_state_machine",
+      "kind": "transition",
+      "path": "[20]",
+      "before": {
+        "letter": "A",
+        "root": 3,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "after": {
+        "letter": "F",
+        "root": 6,
+        "mode": "continues",
+        "ab": "outside",
+        "c": "balanced"
+      },
+      "meta": {
+        "action": "RESTART/A-F",
+        "topo": "same cycle, advance 1",
+        "note": "close loop"
+      },
+      "t": null
+    }
+  ],
+  "final": {
+    "letter": "F",
+    "root": 6,
+    "mode": "continues",
+    "ab": "outside",
+    "c": "balanced"
+  },
+  "meta": {
+    "start": "F",
+    "loops": 3
+  }
+}

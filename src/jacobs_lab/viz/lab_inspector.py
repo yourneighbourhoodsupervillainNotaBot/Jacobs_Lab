@@ -5,7 +5,7 @@ import math
 from typing import List
 
 from jacobs_lab.lab_compat import apply_pyglet_label_guard
-from jacobs_lab.trace.lab_trace import LabTrace
+from jacobs_lab.testing.trace.lab_trace import LabTrace
 
 
 def _short(s: str, n: int = 110) -> str:

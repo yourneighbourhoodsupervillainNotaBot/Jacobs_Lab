@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Optional
 
-from jacobs_lab.trace.lab_trace import LabTrace
+from jacobs_lab.testing.trace.lab_trace import LabTrace
 
 
 def _write(path: str | Path, text: str) -> None:

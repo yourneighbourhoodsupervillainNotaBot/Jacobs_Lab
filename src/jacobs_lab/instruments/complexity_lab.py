@@ -9,7 +9,11 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     from jacobs_lab.computation.folding_computations import Combine, Instr, run_program
 
-from jacobs_lab.computation.turing_universality import MinskyInstr, MinskyMachine, run_minsky
+from jacobs_lab.computation.turing_universality import (
+    MinskyInstr,
+    MinskyMachine,
+    run_minsky,
+)
 
 # ----------------------------------------------------------------------
 # 1) NP, empirically: verifier (polynomial) vs brute-force search (exponential)

@@ -361,7 +361,8 @@ def _run_self_tests():
     lf = fold_lattice([(x, y) for x in range(1, 10) for y in range(1, 10)])
     assert len(lf.crease) == 9 and len(lf.classes) == 45
     assert frozenset({(6, 9), (9, 6)}) in lf.classes
-    from jacobs_lab.structure.level_tree import RecursiveLattice, build_level_tree, flatten
+    from jacobs_lab.core.recursive_lattice import RecursiveLattice
+    from jacobs_lab.structure.level_tree import build_level_tree, flatten
 
     lat = RecursiveLattice(radix=9, x_multiplier=2)
     tree = build_level_tree(lat, 1, 1, 2)

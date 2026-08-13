@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Tuple
 
-from jacobs_lab.trace.lab_trace import TraceBuilder
+from jacobs_lab.testing.trace.lab_trace import TraceBuilder
 
 
 # ----------------------------------------------------------------------

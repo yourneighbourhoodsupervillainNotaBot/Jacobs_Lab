@@ -4,7 +4,7 @@ from typing import List
 
 try:
     from jacobs_lab.core.general_recursive_mapper import digital_root
-    from jacobs_lab.trace.lab_trace import LabTrace, TraceBuilder
+    from jacobs_lab.testing.trace.lab_trace import LabTrace, TraceBuilder
     from jacobs_lab.audio.sonify import (
         SonifiedStep,
         chord_freqs,
@@ -14,7 +14,7 @@ try:
     )
 except ImportError:
     from jacobs_lab.core.general_recursive_mapper import digital_root
-    from jacobs_lab.trace.lab_trace import LabTrace, TraceBuilder
+    from jacobs_lab.testing.trace.lab_trace import LabTrace, TraceBuilder
     from jacobs_lab.audio.sonify import (
         SonifiedStep,
         chord_freqs,

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from jacobs_lab.lab_compat import import_folding
-from jacobs_lab.trace.lab_trace import TraceBuilder
+from jacobs_lab.testing.trace.lab_trace import TraceBuilder
 
 
 # ----------------------------------------------------------------------

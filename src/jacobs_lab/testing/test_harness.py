@@ -5,29 +5,25 @@ import time
 from dataclasses import dataclass
 from typing import List, Optional
 
-
 MODULE_NAMES = [
     "jacobs_lab.core.general_recursive_mapper",
     "jacobs_lab.core.named_aliases",
     "jacobs_lab.core.recursive_lattice",
     "jacobs_lab.core.nested_mapper",
-
     "jacobs_lab.structure.triangle_state_machine",
     "jacobs_lab.structure.folding_graph",
     "jacobs_lab.structure.flexagon",
     "jacobs_lab.structure.level_tree",
-
+    "jacobs_lab.core.addition_graph",
     "jacobs_lab.math_lenses.galois_fields",
     "jacobs_lab.math_lenses.set_theory",
     "jacobs_lab.math_lenses.category_theory",
     "jacobs_lab.math_lenses.natural_transformations",
     "jacobs_lab.math_lenses.quintic_analysis",
-
     "jacobs_lab.computation.folding_computations",
     "jacobs_lab.computation.turing_universality",
     "jacobs_lab.computation.universality_probe",
     "jacobs_lab.computation.complexity_lab",
-
     "jacobs_lab.instruments.fold_codec",
     "jacobs_lab.instruments.fold_complexity",
     "jacobs_lab.instruments.prime_machinery",

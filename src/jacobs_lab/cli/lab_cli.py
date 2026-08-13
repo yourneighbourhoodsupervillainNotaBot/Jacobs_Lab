@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from jacobs_lab.trace.lab_trace import LabTrace
+from jacobs_lab.testing.trace.lab_trace import LabTrace
 
 SOURCES = [
     "triangle",
@@ -29,12 +29,12 @@ def cmd_trace(args):
     source = args.source
 
     if source == "triangle":
-        from jacobs_lab.trace.lab_adapters import trace_triangle_walk
+        from jacobs_lab.testing.trace.lab_adapters import trace_triangle_walk
 
         trace = trace_triangle_walk(loops=args.loops, start=args.start)
 
     elif source == "test-walk":
-        from jacobs_lab.trace.lab_adapters import trace_test_walk
+        from jacobs_lab.testing.trace.lab_adapters import trace_test_walk
 
         trace = trace_test_walk(
             run_real=args.real,
@@ -42,23 +42,23 @@ def cmd_trace(args):
         )
 
     elif source == "fold":
-        from jacobs_lab.trace.lab_adapters import trace_fold_demo
+        from jacobs_lab.testing.trace.lab_adapters import trace_fold_demo
 
         trace = trace_fold_demo(args.demo)
 
     elif source == "flexagon":
-        from jacobs_lab.trace.lab_adapters import trace_flexagon
+        from jacobs_lab.testing.trace.lab_adapters import trace_flexagon
 
         trace = trace_flexagon()
 
     elif source == "category":
-        from jacobs_lab.trace.lab_adapters import trace_portal_natural_transformation
+        from jacobs_lab.testing.trace.lab_adapters import trace_portal_natural_transformation
 
         trace = trace_portal_natural_transformation()
 
     elif source == "pathfinding":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_pathfinding
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_pathfinding
         except ImportError as exc:
             raise SystemExit(
                 "pathfinding tracing requires lab_adapters_extended.py. "
@@ -72,7 +72,7 @@ def cmd_trace(args):
 
     elif source == "three-body":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_three_body
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_three_body
         except ImportError as exc:
             raise SystemExit(
                 "three-body tracing requires lab_adapters_extended.py. "
@@ -86,7 +86,7 @@ def cmd_trace(args):
 
     elif source == "fold-codec":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_fold_codec
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_fold_codec
         except ImportError as exc:
             raise SystemExit(
                 "fold-codec tracing requires lab_adapters_extended.py. "
@@ -97,7 +97,7 @@ def cmd_trace(args):
 
     elif source == "fold-complexity":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_fold_complexity
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_fold_complexity
         except ImportError as exc:
             raise SystemExit(
                 "fold-complexity tracing requires lab_adapters_extended.py. "
@@ -108,7 +108,7 @@ def cmd_trace(args):
 
     elif source == "prime":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_prime_machinery
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_prime_machinery
         except ImportError as exc:
             raise SystemExit(
                 "prime tracing requires lab_adapters_extended.py. "
@@ -122,7 +122,7 @@ def cmd_trace(args):
 
     elif source == "universality":
         try:
-            from jacobs_lab.trace.lab_adapters_extended import trace_universality_probe
+            from jacobs_lab.testing.trace.lab_adapters_extended import trace_universality_probe
         except ImportError as exc:
             raise SystemExit(
                 "universality tracing requires lab_adapters_extended.py. "
@@ -139,7 +139,7 @@ def cmd_trace(args):
         print(f"Saved trace to {args.save}")
 
     if args.text:
-        from jacobs_lab.trace.lab_export import export_text
+        from jacobs_lab.testing.trace.lab_export import export_text
 
         export_text(trace, None)
 
@@ -152,7 +152,7 @@ def cmd_trace(args):
             print(f"Inspector unavailable: {exc}")
             print("Printing text trace instead.")
 
-            from jacobs_lab.trace.lab_export import export_text
+            from jacobs_lab.testing.trace.lab_export import export_text
 
             export_text(trace, None)
 
@@ -174,13 +174,13 @@ def cmd_inspect(args):
         print(f"Inspector unavailable: {exc}")
         print("Printing text trace instead.")
 
-        from jacobs_lab.trace.lab_export import export_text
+        from jacobs_lab.testing.trace.lab_export import export_text
 
         export_text(trace, None)
 
 
 def cmd_export(args):
-    from jacobs_lab.trace.lab_export import export_trace
+    from jacobs_lab.testing.trace.lab_export import export_trace
 
     trace = LabTrace.load(args.trace)
     export_trace(trace, args.out, args.format)
@@ -202,19 +202,19 @@ def cmd_sonify(args):
 
 
 def cmd_test(args):
-    from jacobs_lab.trace import lab_trace
+    from jacobs_lab.testing.trace import lab_trace
 
     lab_trace._run_self_tests()
 
     try:
-        from jacobs_lab.trace import lab_adapters
+        from jacobs_lab.testing.trace import lab_adapters
 
         lab_adapters._run_self_tests()
     except ImportError as exc:
         print(f"Skipping lab_adapters tests: {exc}")
 
     try:
-        from jacobs_lab.trace import lab_adapters_extended
+        from jacobs_lab.testing.trace import lab_adapters_extended
 
         lab_adapters_extended._run_self_tests()
     except ImportError as exc:

@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple
 from jacobs_lab.core.recursive_lattice import RecursiveLattice
 from jacobs_lab.math_lenses.set_theory import UnionFind
 from jacobs_lab.structure.triangle_state_machine import AB, TriangleStateMachine
+from jacobs_lab.core.surface_quotients import TorusCover
 
 LAT = RecursiveLattice(radix=9, x_multiplier=2)
 
@@ -17,18 +18,21 @@ LAT = RecursiveLattice(radix=9, x_multiplier=2)
 # ----------------------------------------------------------------------
 
 
-def lattice_neighbors(lattice, node):
+def lattice_neighbors(lattice, node, retreat: bool = False):
     x, y = node
-    return [("R", lattice.move(x, y, "RIGHT")), ("U", lattice.move(x, y, "UP"))]
+    out = [("R", lattice.move(x, y, "RIGHT")), ("U", lattice.move(x, y, "UP"))]
+    if retreat:
+        out += [("L", lattice.move(x, y, "LEFT")), ("D", lattice.move(x, y, "DOWN"))]
+    return out
 
 
-def bfs(lattice, start):
+def bfs(lattice, start, retreat: bool = False):
     dist = {start: 0}
     parent = {}
     dq = deque([start])
     while dq:
         u = dq.popleft()
-        for _mv, v in lattice_neighbors(lattice, u):
+        for _mv, v in lattice_neighbors(lattice, u, retreat=retreat):
             if v not in dist:
                 dist[v] = dist[u] + 1
                 parent[v] = (u, _mv)
@@ -228,6 +232,77 @@ def biased_search(lattice, start, goal, lam=1.0):
     return None
 
 
+# homotopy-aware pathfinding (with surface_quotients)
+
+
+def winding(lattice, start, moves) -> Tuple[int, int]:
+    """Net cover displacement of a walk = its homotopy class on the torus."""
+    cover = TorusCover(lattice.radix, lattice.x_topology.multiplier, anchor=start)
+    p = cover.lift_to_cover(moves)[-1]
+    return (p.i, p.j)
+
+
+def is_contractible(lattice, start, moves) -> bool:
+    """A closed walk is contractible iff its winding pair is (0, 0)."""
+    return winding(lattice, start, moves) == (0, 0)
+
+
+def homotopy_geodesic(lattice, start, goal, cls=(0, 0)):
+    """Shortest start->goal path in winding class cls.
+
+    In cover coordinates the class pins the target at
+    (dx + a*L1, dy + b*L2); the cover is a grid with unit steps, so the
+    constrained distance is |i| + |j| and any monotone move order works.
+    Returns (cost, path, moves), or (None, None, None) across components.
+    """
+    cover = TorusCover(lattice.radix, lattice.x_topology.multiplier, anchor=start)
+    dx = cyclic_delta(lattice.x_topology, start[0], goal[0])
+    dy = cyclic_delta(lattice.y_topology, start[1], goal[1])
+    if dx is None or dy is None:
+        return None, None, None
+    i = dx + cls[0] * cover.L1
+    j = dy + cls[1] * cover.L2
+    moves = (
+        ["RIGHT"] * max(i, 0)
+        + ["LEFT"] * max(-i, 0)
+        + ["UP"] * max(j, 0)
+        + ["DOWN"] * max(-j, 0)
+    )
+    path = [start]
+    x, y = start
+    for m in moves:
+        x, y = lattice.move(x, y, m)
+        path.append((x, y))
+    return abs(i) + abs(j), path, moves
+
+
+def geodesic_with_retreat(lattice, start, goal):
+    """Undirected geodesic: shortest path when LEFT/DOWN are allowed.
+
+    Equals the cheapest homotopy class among the four signed
+    representatives per axis.
+    """
+    best = None
+    for cls in ((0, 0), (-1, 0), (0, -1), (-1, -1)):
+        cost, path, moves = homotopy_geodesic(lattice, start, goal, cls)
+        if cost is None:
+            continue
+        if best is None or cost < best[0]:
+            best = (cost, path, moves)
+    return best
+
+
+def homotopy_class_costs(lattice, start, goal, max_wind: int = 1):
+    """{(a, b): cost} for all winding classes in [-max_wind, max_wind]^2."""
+    out = []
+    for a in range(-max_wind, max_wind + 1):
+        for b in range(-max_wind, max_wind + 1):
+            cost, _, _ = homotopy_geodesic(lattice, start, goal, (a, b))
+            if cost is not None:
+                out.append(((a, b), cost))
+    return sorted(out, key=lambda t: (t[1], t[0]))
+
+
 # ----------------------------------------------------------------------
 # self-tests
 # ----------------------------------------------------------------------
@@ -263,6 +338,38 @@ def _run_self_tests():
     # 5) biased search reaches the goal.
     exp = biased_search(LAT, start, (8, 7))
     assert exp is None or exp >= 1
+
+    # 6) retreat moves are exact inverses (with wrap-around).
+    assert LAT.move(2, 1, "LEFT") == (1, 1)
+    assert LAT.move(1, 1, "LEFT") == (5, 1)
+
+    # 7) undirected BFS == retreat geodesic everywhere in the component.
+    dist_u, _ = bfs(LAT, start, retreat=True)
+    for goal_u, d_u in dist_u.items():
+        best = geodesic_with_retreat(LAT, start, goal_u)
+        assert best is not None and best[0] == d_u, (goal_u, best, d_u)
+
+    # 8) retreat can be strictly shorter than the directed geodesic.
+    gd, _ = geodesic(LAT, start, (5, 1))
+    rd, rpath, rmoves = geodesic_with_retreat(LAT, start, (5, 1))
+    assert gd == 5 and rd == 1 and rpath[-1] == (5, 1) and rmoves == ["LEFT"]
+
+    # 9) homotopy classes: winding recorded, costs consistent, lift agrees.
+    costs = dict(homotopy_class_costs(LAT, start, (8, 7), max_wind=1))
+    assert costs[(0, 0)] == dist[(8, 7)] == 7
+    assert costs[(0, -1)] == 5 and min(costs.values()) == 5
+    c, p, mv = homotopy_geodesic(LAT, start, (8, 7), (0, -1))
+    assert (c, mv) == (5, ["RIGHT"] * 3 + ["DOWN"] * 2)
+    assert winding(LAT, start, mv) == (3, -2)
+    cover = TorusCover(9, 2, anchor=start)
+    lift = cover.lift_to_cover(mv)
+    assert [(q.x_root, q.y_root) for q in lift] == p and p[-1] == (8, 7)
+
+    # 10) contractibility: zero winding contractible, a full wrap is not.
+    assert is_contractible(LAT, start, ["RIGHT", "UP", "LEFT", "DOWN"])
+    assert not is_contractible(LAT, start, ["RIGHT"] * 6)
+    assert winding(LAT, start, ["RIGHT"] * 6) == (6, 0)
+
     print("All pathfinding-lab self-tests passed.")
 
 

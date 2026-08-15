@@ -18,6 +18,7 @@ import traceback
 CORE = [
     "jacobs_lab.core.general_recursive_mapper",
     "jacobs_lab.core.named_aliases",
+    "jacobs_lab.core.surface_quotients",
     "jacobs_lab.core.recursive_lattice",
     "jacobs_lab.core.addition_graph",
     "jacobs_lab.core.nested_mapper",

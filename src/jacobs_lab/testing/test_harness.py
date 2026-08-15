@@ -15,6 +15,7 @@ MODULE_NAMES = [
     "jacobs_lab.structure.flexagon",
     "jacobs_lab.structure.level_tree",
     "jacobs_lab.core.addition_graph",
+    "jacobs_lab.core.surface_quotients",
     "jacobs_lab.math_lenses.galois_fields",
     "jacobs_lab.math_lenses.set_theory",
     "jacobs_lab.math_lenses.category_theory",

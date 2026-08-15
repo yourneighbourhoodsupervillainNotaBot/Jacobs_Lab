@@ -9,6 +9,7 @@ from jacobs_lab.core.general_recursive_mapper import digital_root
 from jacobs_lab.core.named_aliases import LETTER_TO_ROOT, PORTAL_LETTERS
 from jacobs_lab.math_lenses.set_theory import UnionFind
 from jacobs_lab.structure.triangle_state_machine import AB, CPhase, TriangleStateMachine
+from jacobs_lab.instruments.fold_codec import _fill_level
 
 
 class Combine(Enum):
@@ -147,6 +148,7 @@ class Instr:
     else_prog: Tuple["Instr", ...] = ()
     k: int = 0  # SLIDE: level-delta (keyword only in practice)
     body: Tuple["Instr", ...] = ()  # WHILE: loop body
+    spec: Optional[dict] = None  # UNFOLD: a codec level record (n, p, items)
 
 
 def run_program(values, program, radix: int = 9, max_steps: int = 10_000_000):
@@ -178,6 +180,22 @@ def run_program(values, program, radix: int = 9, max_steps: int = 10_000_000):
             elif ins.op == "WHILE":
                 while eval_pred(cells, ins.pred):
                     cells = exec_prog(cells, ins.body)
+            elif ins.op == "UNFOLD":
+                # Inverse of one codec fold level: rebuild the pre-fold strip
+                # from the residual. Compression records execute as programs.
+                values = _fill_level(ins.spec, [c.value for c in cells])
+                cells = tuple(make_cell(v) for v in values)
+            elif ins.op == "ADD":
+                # AdditionGraph step: translate the root by the chosen digit
+                # k, preserving the level. (k=0 and k=9 are the collision.)
+                lst = list(cells)
+                v = lst[ins.arg].value
+                level, root = (v - 1) // radix, (v - 1) % radix + 1
+                lst[ins.arg] = Cell(
+                    level * radix + digital_root(root + ins.k, radix),
+                    lst[ins.arg].members,
+                )
+                cells = tuple(lst)
             else:
                 res = (
                     fold_strip(cells, ins.arg, ins.rule, radix)
@@ -191,6 +209,18 @@ def run_program(values, program, radix: int = 9, max_steps: int = 10_000_000):
     cells = exec_prog(tuple(make_cell(v) for v in values), tuple(program))
     return cells, out, history
 
+
+def codec_to_program(rec: dict) -> Tuple[Instr, ...]:
+    """The codec decoder, as a VM program: one UNFOLD per level.
+
+    Run it on the top residual and the original strip is rebuilt exactly:
+        cells, _, _ = run_program(rec["top"], codec_to_program(rec))
+        [c.value for c in cells] == decode(rec)
+    Raw-mode records need no program: the values already are the strip.
+    """
+    if rec.get("mode") == "raw":
+        return ()
+    return tuple(Instr("UNFOLD", spec=lvl) for lvl in reversed(rec["levels"]))
 
 def fold_bags(bags, pivot: int):
     bags = list(bags)
@@ -371,6 +401,28 @@ def _run_self_tests():
     assert set(lf2.crease) == {(n.x_root, n.y_root) for n in flatten(tree) if n.portal}
     mirror = next(c for c in lf.classes if c == frozenset({(6, 9), (9, 6)}))
     assert {v for p in mirror for v in p} == set(PORTAL_LETTERS["G"])
+
+    # 9) UNFOLD: compression records execute as programs (VM is reversible).
+    from jacobs_lab.instruments.fold_codec import encode as codec_encode
+
+    L = [4, 9, 12, 30, 7, 21, 8, 5]
+    pal = L + [7] + L[::-1]
+    for data in (S, [6, 11, 13, 7, 13, 11, 9], pal):
+        rec = codec_encode(data)
+        prog = codec_to_program(rec)
+        if rec["mode"] == "raw":
+            assert prog == ()
+            continue
+        cells, _, _ = run_program(rec["top"], prog)
+        assert [c.value for c in cells] == data
+
+    # 10) ADD: choice-driven root translation, level preserved; k=9 is the
+    #     AdditionGraph collision (identity on the root).
+    _, outA, _ = run_program([12], [Instr("ADD", 0, k=5), Instr("READ", 0)])
+    assert outA == [17]  # enc(1,3) -> enc(1, dr(3+5)=8) = 17
+    _, outB, _ = run_program([12], [Instr("ADD", 0, k=9), Instr("READ", 0)])
+    assert outB == [12]
+    
     print("All folding-computation self-tests passed.")
 
 

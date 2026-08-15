@@ -3,9 +3,19 @@ from __future__ import annotations
 from typing import Callable, Dict, List, Sequence, Tuple
 
 try:  # module may be named folding_computation.py or folding_computations.py
-    from jacobs_lab.computation.folding_computations import Combine, Instr, Pred, run_program
+    from jacobs_lab.computation.folding_computations import (
+        Combine,
+        Instr,
+        Pred,
+        run_program,
+    )
 except ModuleNotFoundError:  # pragma: no cover
-    from jacobs_lab.computation.folding_computations import Combine, Instr, Pred, run_program
+    from jacobs_lab.computation.folding_computations import (
+        Combine,
+        Instr,
+        Pred,
+        run_program,
+    )
 
 from jacobs_lab.core.general_recursive_mapper import RecursiveMapper, digital_root
 
@@ -52,6 +62,41 @@ def probe_pure_folds(domain) -> Dict[Tuple[int, ...], Tuple[Instr, ...]]:
             # GLUE shrinks the strip; some 2-op sequences then address an
             # index that no longer exists. The VM is strict by design, so
             # such sequences are simply not valid programs on this domain.
+            continue
+        found.setdefault(table, prog)
+    return found
+
+
+def probe_with_add(domain) -> Dict[Tuple[int, ...], Tuple[Instr, ...]]:
+    """The pure-fold base plus ADD (digit-choice root translation).
+
+    The next rung of the ladder: the semiring closed under pre-translation
+    of the inputs. ADD never shrinks the strip, but a later GLUE/FOLD can
+    still invalidate an index, so invalid sequences are skipped as before.
+    """
+    base = (
+        [
+            Instr("GLUE", 0, r)
+            for r in (
+                Combine.DIGITAL_SUM,
+                Combine.DIGITAL_PRODUCT,
+                Combine.KEEP_LEFT,
+                Combine.KEEP_RIGHT,
+            )
+        ]
+        + [
+            Instr("FOLD", p, r)
+            for p in (0, 1)
+            for r in (Combine.DIGITAL_SUM, Combine.KEEP_LEFT)
+        ]
+        + [Instr("ADD", cell, k=d) for cell in (0, 1) for d in (1, 2, 5, 9)]
+    )
+    programs = [(p,) for p in base] + [(a, b) for a in base for b in base]
+    found: Dict[Tuple[int, ...], Tuple[Instr, ...]] = {}
+    for prog in programs:
+        try:
+            table = tuple(induced_value(prog, x) for x in domain)
+        except (ValueError, IndexError):
             continue
         found.setdefault(table, prog)
     return found
@@ -121,6 +166,16 @@ def _run_self_tests():
     t_level = tuple(MAPPER.decode_num(x).level + 1 for x, _ in LEVEL_DOMAIN)
     assert t_level not in found_lvl
     assert tuple(x for x, _ in LEVEL_DOMAIN) in found_lvl  # projections work
+
+    # 4) ADD lifts the class: root translations become single-op programs,
+    #    and were absent from the pure-fold class; max stays absent within
+    #    the enumerated space (evidence, not proof -- as always here).
+    found_add = probe_with_add(ROOT_DOMAIN)
+    t_trans = tuple(digital_root(x + 5) for x, _ in ROOT_DOMAIN)
+    assert t_trans in found_add
+    assert t_trans not in found
+    assert t_max not in found_add
+
     print("All universality-probe self-tests passed.")
 
 
